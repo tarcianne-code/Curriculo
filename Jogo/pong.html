@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pong Simples - Tarcianne Edition</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #0f0;
+    }
+
+    canvas {
+      background: #111;
+      border: 2px solid #0f0;
+      box-shadow: 0 0 30px #0f0;
+      image-rendering: pixelated;
+    }
+
+    #placar {
+      font-size: 3rem;
+      margin: 20px 0;
+      letter-spacing: 10px;
+      text-shadow: 0 0 20px #0f0;
+    }
+
+    #instrucoes {
+      position: absolute;
+      top: 20px;
+      font-size: 1.2rem;
+      color: #555;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #vencedor {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 5rem;
+      color: #ff0;
+      text-shadow: 0 0 40px #ff0;
+      display: none;
+      z-index: 10;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1.3rem;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #0f0;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #0c0;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="instrucoes">
+    W / S ←→ ↑ / ↓    |    Primeiro a 5 pontos ganha!
+  </div>
+
+  <div id="placar">0 : 0</div>
+  <canvas id="game" width="900" height="600"></canvas>
+  <div id="vencedor"></div>
+  <button id="restart" style="display:none;">Jogar de novo</button>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const placar = document.getElementById('placar');
+    const vencedorMsg = document.getElementById('vencedor');
+    const restartBtn = document.getElementById('restart');
+
+    // Configurações
+    const paddleWidth = 15;
+    const paddleHeight = 100;
+    const ballSize = 15;
+    const paddleSpeed = 8;
+    const ballSpeed = 7;
+
+    let playerY = (canvas.height - paddleHeight) / 2;
+    let computerY = (canvas.height - paddleHeight) / 2;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height / 2;
+    let ballDX = ballSpeed * (Math.random() > 0.5 ? 1 : -1);
+    let ballDY = ballSpeed * (Math.random() * 2 - 1);
+
+    let playerScore = 0;
+    let computerScore = 0;
+    let gameOver = false;
+
+    const keys = {};
+
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+    // Suporte mobile (toque na tela)
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const y = touch.clientY - rect.top;
+      playerY = y - paddleHeight / 2;
+      if (playerY < 0) playerY = 0;
+      if (playerY > canvas.height - paddleHeight) playerY = canvas.height - paddleHeight;
+    }, { passive: false });
+
+    function update() {
+      if (gameOver) return;
+
+      // Movimento do jogador (esquerda)
+      if (keys['w'] && playerY > 0) playerY -= paddleSpeed;
+      if (keys['s'] && playerY < canvas.height - paddleHeight) playerY += paddleSpeed;
+
+      // Movimento do computador (direita) - IA simples
+      if (computerY + paddleHeight/2 < ballY) computerY += paddleSpeed * 0.8;
+      if (computerY + paddleHeight/2 > ballY) computerY -= paddleSpeed * 0.8;
+
+      // Movimento da bola
+      ballX += ballDX;
+      ballY += ballDY;
+
+      // Colisão com teto/chão
+      if (ballY <= 0 || ballY >= canvas.height - ballSize) {
+        ballDY = -ballDY;
+      }
+
+      // Colisão com raquete esquerda (jogador)
+      if (ballX <= paddleWidth + 10 &&
+          ballY + ballSize >= playerY &&
+          ballY <= playerY + paddleHeight) {
+        ballDX = -ballDX;
+        ballDY += (ballY - (playerY + paddleHeight/2)) * 0.3; // efeito de curva
+      }
+
+      // Colisão com raquete direita (computador)
+      if (ballX >= canvas.width - paddleWidth - 10 - ballSize &&
+          ballY + ballSize >= computerY &&
+          ballY <= computerY + paddleHeight) {
+        ballDX = -ballDX;
+        ballDY += (ballY - (computerY + paddleHeight/2)) * 0.3;
+      }
+
+      // Pontuação
+      if (ballX < 0) {
+        computerScore++;
+        resetBall();
+      }
+      if (ballX > canvas.width) {
+        playerScore++;
+        resetBall();
+      }
+
+      placar.textContent = `${playerScore} : ${computerScore}`;
+
+      // Fim de jogo
+      if (playerScore >= 5 || computerScore >= 5) {
+        gameOver = true;
+        vencedorMsg.textContent = playerScore >= 5 ? "VOCÊ VENCEU!" : "COMPUTADOR VENCEU!";
+        vencedorMsg.style.display = 'block';
+        restartBtn.style.display = 'block';
+      }
+    }
+
+    function resetBall() {
+      ballX = canvas.width / 2;
+      ballY = canvas.height / 2;
+      ballDX = ballSpeed * (Math.random() > 0.5 ? 1 : -1);
+      ballDY = ballSpeed * (Math.random() * 2 - 1);
+    }
+
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Linha central
+      ctx.strokeStyle = '#333';
+      ctx.setLineDash([10, 15]);
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2, 0);
+      ctx.lineTo(canvas.width/2, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Raquetes
+      ctx.fillStyle = '#0f0';
+      ctx.fillRect(10, playerY, paddleWidth, paddleHeight);           // esquerda
+      ctx.fillRect(canvas.width - paddleWidth - 10, computerY, paddleWidth, paddleHeight); // direita
+
+      // Bola
+      ctx.fillStyle = '#ff0';
+      ctx.beginPath();
+      ctx.arc(ballX + ballSize/2, ballY + ballSize/2, ballSize/2, 0, Math.PI*2);
+      ctx.fill();
+
+      // Efeito glow na bola
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#ff0';
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Reiniciar jogo
+    restartBtn.addEventListener('click', () => {
+      playerScore = 0;
+      computerScore = 0;
+      gameOver = false;
+      vencedorMsg.style.display = 'none';
+      restartBtn.style.display = 'none';
+      placar.textContent = '0 : 0';
+      resetBall();
+      playerY = (canvas.height - paddleHeight) / 2;
+      computerY = (canvas.height - paddleHeight) / 2;
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
