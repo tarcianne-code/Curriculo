@@ -6,26 +6,30 @@ Desenvolvedora em formação com foco em back-end, APIs REST, banco de dados e i
 
 ## 🚀 Projetos em Destaque
 
-### 🔹 API em Java
-- API REST com autenticação
-- Integração com banco de dados
-- Estrutura em camadas
-🔗 Link do projeto
+### 🔹 API de Usuários (Java - Spring Boot)
+- API REST para cadastro e autenticação de usuários
+- Integração com banco de dados relacional (PostgreSQL/MySQL)
+- Estrutura em camadas (Controller, Service, Repository)
+- Controle de acesso (roles de usuário)
+🔗 Código: 
 
 ---
 
-### 🔹 API em Python
-- Desenvolvimento com FastAPI
-- Validação de dados
-- CRUD completo
-🔗 Link do projeto
+### 🔹 API de Tarefas (Python - FastAPI)
+- API REST para gerenciamento de tarefas (CRUD completo)
+- Validação de dados com Pydantic
+- Manipulação de status (pendente → concluída)
+- Estrutura organizada por módulos
+🔗 Código: link-do-repo  
 
 ---
 
-### 🔹 Sistema Web
-- Integração front + back
-- Manipulação de dados
-🔗 Link do projeto
+### 🔹 Sistema de Pedidos (Web - Full Stack)
+- Backend com API REST para controle de pedidos
+- Regras de negócio (pagamento antes de entrega)
+- Integração com frontend simples (HTML, CSS, JS)
+- Manipulação de estados (pendente, pago, entregue)
+🔗 Código: link-do-repo
 
 ---
 
