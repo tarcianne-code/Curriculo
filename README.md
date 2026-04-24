@@ -20,7 +20,7 @@ Desenvolvedora em formação com foco em back-end, APIs REST, banco de dados e i
 - Validação de dados com Pydantic
 - Manipulação de status (pendente → concluída)
 - Estrutura organizada por módulos
-🔗 Código: 
+🔗 Código: https://api-tasks-s7vy.onrender.com
 
 ---
 
